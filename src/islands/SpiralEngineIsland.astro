@@ -65,7 +65,7 @@ const tiles: TileSpec[] = sections
 </script>
 
 <script type="module">
-  import { initSpiral } from '../islands/spiralClient.ts';
+  import { initSpiral } from './spiralClient.ts';
   const dataEl = document.getElementById('spiral-data');
   const data = dataEl ? JSON.parse(dataEl.textContent || '{}') : {};
   initSpiral(data);

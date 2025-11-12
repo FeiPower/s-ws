@@ -12,6 +12,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+import '../styles/global.css';
 ---
 
 <!doctype html>
@@ -44,8 +45,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     
     <!-- Accessibility -->
     <meta name="theme-color" content="#0a0a0a" />
-    
-    <link rel="stylesheet" href="/src/styles/global.css" />
   </head>
   <body>
     <!-- Skip to main content -->

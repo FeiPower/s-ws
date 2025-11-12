@@ -509,15 +509,13 @@ docker inspect spiralnav-dev
 ```
 
 ## Security Best Practices
-
-1. **Non-root user** (TODO: add to Dockerfile)
-2. **Scan for vulnerabilities**:
-   ```bash
-   docker scan spiralnav:prod
-   ```
-3. **Keep base images updated**
-4. **Use multi-stage builds** (already done)
-5. **Minimal attack surface** (alpine base)
+- **Run vulnerability scans**:
+  ```bash
+  docker scan spiralnav:prod
+  ```
+- **Keep base images updated**
+- **Use multi-stage builds**
+- **Minimize attack surface** (alpine base)
 
 ## FAQ
 

@@ -49,7 +49,7 @@ Shows:
 4. Analyze frame timing, GC events
 ```
 
-### 3. Testing Normaliza tion
+### 3. Testing Normalization
 
 **Manual Test:**
 

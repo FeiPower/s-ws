@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPhase } from '../../config/graphics';
+
+export const getStaticPaths = async () => {
+  const resources = await getCollection('resources');
+  return resources.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+};
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const phase = entry.data.phaseId ? getPhase(
+  entry.data.phaseId === 'overview' ? 25 : 
+  entry.data.phaseId === 'discovery' ? 85 : 
+  entry.data.phaseId === 'strategy' ? 170 : 
+  entry.data.phaseId === 'execution' ? 290 : 460
+) : null;
+---
+
+<BaseLayout
+  title={`${entry.data.title} - Resource`}
+  description={entry.data.description}
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-4">
+        <nav class="flex gap-4">
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Recursos
+          </a>
+          <a href="/" class="inline-flex items-center gap-2 px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors">
+            Spiral Experience
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+      <article class="max-w-4xl mx-auto">
+        {phase && (
+          <div
+            class="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+            style={`background-color: ${phase.color}20; color: ${phase.color}`}
+          >
+            <span class="w-2 h-2 rounded-full" style={`background-color: ${phase.color}`}></span>
+            Fase: {phase.label}
+          </div>
+        )}
+
+        <header class="mb-8">
+          <div class="mb-4">
+            <span class="inline-flex items-center rounded-md bg-spiral-accent/20 px-3 py-1 text-sm font-medium text-spiral-accent">
+              {entry.data.resourceType}
+            </span>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-bold text-spiral-light mb-4">
+            {entry.data.title}
+          </h1>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            {entry.data.description}
+          </p>
+        </header>
+
+        {(entry.data.downloadUrl || entry.data.externalUrl) && (
+          <div class="mb-8 p-6 bg-gradient-to-r from-spiral-accent/10 to-transparent border border-spiral-accent/30 rounded-xl flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-spiral-light mb-1">Descargar Recurso</h3>
+              <p class="text-sm text-gray-400">Gratuito con atribución</p>
+            </div>
+            <a
+              href={entry.data.downloadUrl || entry.data.externalUrl || '#'}
+              class="px-6 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors inline-flex items-center gap-2"
+              download={entry.data.downloadUrl ? true : undefined}
+              target={entry.data.externalUrl ? '_blank' : undefined}
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Descargar
+            </a>
+          </div>
+        )}
+
+        <div class="prose prose-invert prose-lg max-w-none prose-headings:text-spiral-light prose-p:text-gray-300 prose-a:text-spiral-accent prose-strong:text-spiral-light prose-blockquote:border-spiral-accent prose-blockquote:text-gray-300 prose-ul:text-gray-300 prose-ol:text-gray-300 prose-li:marker:text-spiral-accent">
+          <Content />
+        </div>
+
+        {entry.data.tags && entry.data.tags.length > 0 && (
+          <div class="mt-12 pt-8 border-t border-gray-800">
+            <h3 class="text-sm font-semibold text-gray-400 mb-3">Temas</h3>
+            <div class="flex flex-wrap gap-2">
+              {entry.data.tags.map((tag: string) => (
+                <span class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1 text-sm font-medium text-gray-300 ring-1 ring-inset ring-gray-700">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="mt-16 text-center p-8 bg-gradient-to-r from-spiral-accent/10 to-transparent border border-spiral-accent/30 rounded-xl">
+          <h3 class="text-2xl font-bold text-spiral-light mb-4">
+            ¿Necesitas ayuda aplicando este recurso?
+          </h3>
+          <p class="text-gray-400 mb-6">
+            Ofrecemos sesiones de consultoría para ayudarte a implementar estos frameworks en tu organización.
+          </p>
+          <button
+            onclick="window.spiralModal?.show()"
+            class="px-8 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors"
+          >
+            Agendar Consultoría
+          </button>
+        </div>
+      </article>
+    </main>
+
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 Workalógico. Built with Astro & the Golden Ratio.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+

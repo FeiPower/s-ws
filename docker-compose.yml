@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Development service with hot reload
+  spiral-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: spiralnav-dev
+    ports:
+      - "4321:4321"
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./public:/app/public
+      # Preserve node_modules in container
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PUBLIC_RENDERER=canvas
+      - PUBLIC_FORM_ENDPOINT=https://formspree.io/f/YOUR_FORM_ID
+    command: npm run dev -- --host 0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4321"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Production service
+  spiral-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spiralnav-prod
+    ports:
+      - "4322:4321"
+    environment:
+      - NODE_ENV=production
+      - PUBLIC_RENDERER=canvas
+      - PUBLIC_FORM_ENDPOINT=https://formspree.io/f/YOUR_FORM_ID
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # NGINX reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: spiralnav-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - spiral-prod
+    restart: unless-stopped
+    profiles:
+      - production
+      - nginx
+

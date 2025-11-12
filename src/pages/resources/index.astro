@@ -1,0 +1,262 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { getCollection } from 'astro:content';
+
+const allResources = await getCollection('resources');
+const sortedResources = allResources.sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return b.data.featured ? 1 : -1;
+  return a.data.title.localeCompare(b.data.title);
+});
+
+const resourcesByType = {
+  'Framework': sortedResources.filter(r => r.data.resourceType === 'Framework'),
+  'Template': sortedResources.filter(r => r.data.resourceType === 'Template'),
+  'Guide': sortedResources.filter(r => r.data.resourceType === 'Guide'),
+  'Tool': sortedResources.filter(r => r.data.resourceType === 'Tool'),
+  'Whitepaper': sortedResources.filter(r => r.data.resourceType === 'Whitepaper'),
+};
+---
+
+<BaseLayout
+  title="Resources - Frameworks & Templates"
+  description="Downloadable resources for implementing Fibonacci Growth methodology"
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-spiral-light mb-2">
+          Resources
+        </h1>
+        <p class="text-gray-400">
+          Frameworks, templates y herramientas
+        </p>
+        <div class="flex gap-4 mt-4">
+          <a
+            href="/"
+            class="inline-block px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+          >
+            ← Spiral Experience
+          </a>
+          <a
+            href="/linear"
+            class="inline-block px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            Linear Navigation
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-12">
+      <div class="max-w-6xl mx-auto">
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold text-spiral-light mb-4">
+            Democratizando el Crecimiento Exponencial
+          </h2>
+          <p class="text-gray-400 leading-relaxed">
+            Recursos prácticos para aplicar la metodología Fibonacci en tus propios proyectos. 
+            Descargables gratuitos con atribución.
+          </p>
+        </div>
+
+        <!-- All Resources -->
+        {Object.entries(resourcesByType).map(([type, resources]) => resources.length > 0 && (
+          <section class="mb-12">
+            <h3 class="text-xl font-bold text-spiral-light mb-6">
+              {type === 'Framework' && '📐'} 
+              {type === 'Template' && '📄'} 
+              {type === 'Guide' && '📚'} 
+              {type === 'Tool' && '🔧'} 
+              {type === 'Whitepaper' && '📊'}
+              {' '}{type}s
+              <span class="text-sm text-gray-500 ml-2">({resources.length})</span>
+            </h3>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {resources.map((resource) => (
+                <ContentCard
+                  title={resource.data.title}
+                  description={resource.data.description}
+                  href={`/resources/${resource.slug}`}
+                  tags={resource.data.tags}
+                  phaseId={resource.data.phaseId}
+                  meta={resource.data.resourceType}
+                  featured={resource.data.featured}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+
+        <!-- Resource Categories (old static content below) -->
+        <div class="space-y-6 hidden">
+          <!-- Documentation -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">📚</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  Methodology Documentation
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Documentación completa de la metodología Fibonacci Growth, incluyendo fundamentos matemáticos, 
+                  aplicación por tipo de proyecto y casos de estudio.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    PDF (Coming Soon)
+                  </button>
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Interactive Guide (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- OKR Framework -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">🎯</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  OKR Framework Template
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Template de Objectives & Key Results alineado a las 4 fases de la espiral. 
+                  Incluye métricas sugeridas por tipo de proyecto.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Google Sheets (Coming Soon)
+                  </button>
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Notion (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Metrics Dashboard -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">📊</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  Growth Metrics Dashboard
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Dashboard template para tracking de métricas de crecimiento por fase. 
+                  Visualiza tu progreso en la espiral en tiempo real.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Looker Studio (Coming Soon)
+                  </button>
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    PowerBI (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project Checklists -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">✅</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  Phase Checklists
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Checklists detallados para cada una de las 4 fases. Asegura que no olvides ningún componente crítico.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    PDF (Coming Soon)
+                  </button>
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Markdown (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Design System -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">🎨</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  Fibonacci Design System
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Design system basado en proporciones áureas. Incluye escalas tipográficas, spacing, 
+                  color palettes y componentes UI.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Figma (Coming Soon)
+                  </button>
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    Tailwind Config (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- API & Integrations -->
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <div class="flex items-start gap-4">
+              <div class="text-4xl">🔌</div>
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-spiral-light mb-2">
+                  Integration Blueprints
+                </h3>
+                <p class="text-gray-400 mb-4">
+                  Blueprints de integración para las herramientas más comunes: Analytics, CRM, Marketing Automation, 
+                  Payment Gateways.
+                </p>
+                <div class="flex gap-3">
+                  <button class="px-4 py-2 bg-spiral-dark border border-gray-700 text-gray-400 rounded text-sm hover:border-spiral-accent transition-colors">
+                    GitHub (Coming Soon)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Newsletter Signup -->
+        <div class="mt-16 bg-spiral-dark/50 border border-gray-700 rounded-lg p-8 text-center">
+          <h3 class="text-xl font-bold text-spiral-light mb-3">
+            🔔 Notifícame cuando los recursos estén disponibles
+          </h3>
+          <p class="text-gray-400 mb-6">
+            Suscríbete para recibir actualizaciones cuando publiquemos nuevos frameworks y templates.
+          </p>
+          <button
+            onclick="window.spiralModal?.show()"
+            class="px-8 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent"
+          >
+            Suscribirme
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 Workalógico. Built with Astro & the Golden Ratio.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+

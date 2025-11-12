@@ -1,0 +1,63 @@
+---
+import type { TileSpec } from '../utils/tiles/types';
+
+interface Props {
+  tile: TileSpec;
+  x?: number;
+  y?: number;
+  scale?: number;
+  focused?: boolean;
+  visible?: boolean;
+}
+
+const { tile, x = 0, y = 0, scale = 1, focused = false, visible = true } = Astro.props;
+---
+
+<div
+  data-tile-id={tile.id}
+  class:list={[
+    'tile-card absolute pointer-events-auto transition-all duration-300',
+    'bg-spiral-dark/80 backdrop-blur-sm border border-gray-800',
+    'rounded-xl p-4 min-w-[220px] max-w-[320px] shadow-xl shadow-black/30',
+    'ring-1 ring-white/5 hover:ring-spiral-accent/40 hover:shadow-2xl',
+    focused && 'ring-2 ring-spiral-accent shadow-lg shadow-spiral-accent/50 scale-110',
+    !visible && 'opacity-0 pointer-events-none',
+  ]}
+  style={`transform: translate(${x}px, ${y}px) scale(${scale}); transform-origin: center;`}
+  role="article"
+  aria-label={tile.title}
+  tabindex={visible && !focused ? 0 : -1}
+>
+  <h3 class="text-lg font-semibold text-spiral-light mb-2">
+    {tile.title}
+  </h3>
+
+  {tile.summary && (
+    <p class="text-sm text-gray-400 mb-3 leading-relaxed line-clamp-3">
+      {tile.summary}
+    </p>
+  )}
+
+  <a
+    href={tile.route}
+    class="inline-block px-4 py-2 rounded text-black bg-amber-500 hover:bg-amber-400 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-spiral-dark"
+    tabindex={visible ? 0 : -1}
+    aria-label={`Explore ${tile.title}`}
+  >
+    Explore
+  </a>
+</div>
+
+<style>
+  .tile-card {
+    will-change: transform, opacity;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+

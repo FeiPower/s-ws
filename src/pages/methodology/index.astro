@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const PHI = 1.618;
+---
+
+<BaseLayout
+  title="Methodology - Fibonacci Growth Thesis"
+  description="Understanding the mathematical foundation of infinite, exponential growth"
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-spiral-light mb-2">
+          Fibonacci Growth Methodology
+        </h1>
+        <p class="text-gray-400">
+          La matemática del crecimiento exponencial sin límites
+        </p>
+        <div class="flex gap-4 mt-4">
+          <a
+            href="/"
+            class="inline-block px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+          >
+            ← Spiral Experience
+          </a>
+          <a
+            href="/linear"
+            class="inline-block px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            Linear Navigation
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-12">
+      <div class="max-w-4xl mx-auto">
+        <!-- Mathematical Foundation -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-spiral-light mb-6">
+            Fundamento Matemático: La Proporción Áurea
+          </h2>
+          
+          <div class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-8 mb-6">
+            <div class="text-center mb-6">
+              <div class="text-6xl font-bold text-spiral-accent mb-2">φ ≈ {PHI}</div>
+              <p class="text-gray-400">La constante del crecimiento natural</p>
+            </div>
+            
+            <div class="space-y-4 text-gray-300">
+              <p>La espiral logarítmica de Fibonacci sigue la ecuación:</p>
+              <div class="bg-gray-900 p-4 rounded font-mono text-sm text-center">
+                r = a · φ<sup>(θ / (π/2))</sup>
+              </div>
+              <p class="text-sm text-gray-400">
+                Donde cada cuarto de vuelta (π/2 radianes) multiplica el radio por φ, creando crecimiento exponencial perpetuo.
+              </p>
+            </div>
+          </div>
+
+          <p class="text-gray-400 leading-relaxed">
+            Esta proporción no es arbitraria. Aparece en la naturaleza (nautilus, girasoles, galaxias), 
+            el arte (Partenón, Da Vinci), y ahora, en la arquitectura de proyectos que escalan sin fricción. 
+            Cada fase de nuestro proceso amplifica el valor anterior por φ, garantizando crecimiento sostenible.
+          </p>
+        </section>
+
+        <!-- The 4 Phases -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-spiral-light mb-6">
+            Las 4 Fases de la Espiral
+          </h2>
+
+          <div class="space-y-6">
+            <!-- Discovery -->
+            <article class="border-l-4 border-blue-500 bg-spiral-dark/50 p-6 rounded-r-lg">
+              <h3 class="text-xl font-bold text-blue-400 mb-2">
+                1. Discovery (Azul)
+              </h3>
+              <p class="text-gray-400 mb-4">
+                Investigación profunda del ADN del negocio. 4 componentes especializados mapean el contexto completo.
+              </p>
+              <ul class="list-disc list-inside text-gray-400 space-y-1 text-sm">
+                <li>User Research & Journey Mapping</li>
+                <li>Market Intelligence & Competitor Analysis</li>
+                <li>Technical Audit & Stack Evaluation</li>
+                <li>Business Model & Revenue Streams</li>
+              </ul>
+            </article>
+
+            <!-- Strategy -->
+            <article class="border-l-4 border-green-500 bg-spiral-dark/50 p-6 rounded-r-lg">
+              <h3 class="text-xl font-bold text-green-400 mb-2">
+                2. Strategy (Verde)
+              </h3>
+              <p class="text-gray-400 mb-4">
+                Arquitectura de la solución. Cada decisión se justifica con ROI proyectado.
+              </p>
+              <ul class="list-disc list-inside text-gray-400 space-y-1 text-sm">
+                <li>Information Architecture & System Design</li>
+                <li>Technology Stack & Integration Planning</li>
+                <li>Content Strategy & Semantic Structure</li>
+                <li>Growth Metrics & KPI Framework</li>
+              </ul>
+            </article>
+
+            <!-- Execution -->
+            <article class="border-l-4 border-orange-500 bg-spiral-dark/50 p-6 rounded-r-lg">
+              <h3 class="text-xl font-bold text-orange-400 mb-2">
+                3. Execution (Naranja)
+              </h3>
+              <p class="text-gray-400 mb-4">
+                Construcción con arquitectura multi-agente. Desarrollo, diseño, contenido y QA en paralelo.
+              </p>
+              <ul class="list-disc list-inside text-gray-400 space-y-1 text-sm">
+                <li>Agile Development Sprints</li>
+                <li>Visual Design & Brand Implementation</li>
+                <li>Content Production & Copywriting</li>
+                <li>QA Automation & Performance Testing</li>
+              </ul>
+            </article>
+
+            <!-- Scale -->
+            <article class="border-l-4 border-purple-500 bg-spiral-dark/50 p-6 rounded-r-lg">
+              <h3 class="text-xl font-bold text-purple-400 mb-2">
+                4. Scale (Púrpura)
+              </h3>
+              <p class="text-gray-400 mb-4">
+                Optimización continua y aceleración. Feedback loops que alimentan la siguiente iteración.
+              </p>
+              <ul class="list-disc list-inside text-gray-400 space-y-1 text-sm">
+                <li>Analytics & Behavior Tracking</li>
+                <li>A/B Testing & Conversion Optimization</li>
+                <li>SEO & Performance Tuning</li>
+                <li>User Feedback & Iteration Planning</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <!-- Multi-Agent Architecture -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-spiral-light mb-6">
+            Arquitectura Multi-Agente
+          </h2>
+          <p class="text-gray-400 leading-relaxed mb-6">
+            16 agentes especializados (4 por fase) trabajan en paralelo, cada uno experto en su dominio. 
+            Esta especialización elimina silos y acelera entrega mientras mantiene coherencia arquitectónica.
+          </p>
+          <div class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <p class="text-sm text-gray-400 italic">
+              "No vendemos tecnología, entregamos certeza y ROI. Cada agente traduce complejidad en decisiones 
+              accionables, asegurando que el cliente siempre entienda el 'por qué' detrás del 'cómo'."
+            </p>
+          </div>
+        </section>
+
+        <!-- Universal Applicability -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold text-spiral-light mb-6">
+            Aplicabilidad Universal
+          </h2>
+          <p class="text-gray-400 leading-relaxed mb-6">
+            La belleza de la espiral: funciona para <strong>cualquier tipo de proyecto</strong>. 
+            Software, branding, eventos, startups—todos siguen la misma lógica de fases. Solo cambian los artefactos.
+          </p>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="text-center p-4 bg-spiral-dark/50 border border-gray-700 rounded">
+              <div class="text-2xl mb-2">🎯</div>
+              <p class="text-sm text-gray-400">Enfoque en resultados</p>
+            </div>
+            <div class="text-center p-4 bg-spiral-dark/50 border border-gray-700 rounded">
+              <div class="text-2xl mb-2">📈</div>
+              <p class="text-sm text-gray-400">ROI demostrable</p>
+            </div>
+            <div class="text-center p-4 bg-spiral-dark/50 border border-gray-700 rounded">
+              <div class="text-2xl mb-2">♾️</div>
+              <p class="text-sm text-gray-400">Crecimiento infinito</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <div class="text-center border-t border-gray-800 pt-12">
+          <h3 class="text-2xl font-bold text-spiral-light mb-4">
+            ¿Quieres aplicar esta metodología?
+          </h3>
+          <button
+            onclick="window.spiralModal?.show()"
+            class="px-8 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent"
+          >
+            Hablemos de tu proyecto
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 Workalógico. Built with Astro & the Golden Ratio.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+

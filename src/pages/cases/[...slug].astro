@@ -1,0 +1,188 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPhase } from '../../config/graphics';
+
+export const getStaticPaths = async () => {
+  const cases = await getCollection('cases');
+  return cases.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+};
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const phase = entry.data.phaseId ? getPhase(
+  entry.data.phaseId === 'overview' ? 25 : 
+  entry.data.phaseId === 'discovery' ? 85 : 
+  entry.data.phaseId === 'strategy' ? 170 : 
+  entry.data.phaseId === 'execution' ? 290 : 460
+) : null;
+
+// Get related cases
+const allCases = await getCollection('cases');
+const relatedCases = allCases
+  .filter(c => c.slug !== entry.slug && (
+    c.data.projectType === entry.data.projectType ||
+    c.data.industry === entry.data.industry ||
+    c.data.phaseId === entry.data.phaseId
+  ))
+  .slice(0, 3);
+---
+
+<BaseLayout
+  title={`${entry.data.title} - Case Study`}
+  description={entry.data.description}
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-4">
+        <nav class="flex gap-4">
+          <a
+            href="/cases"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Todos los Casos
+          </a>
+          <a
+            href="/"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            Spiral Experience
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-12">
+      <article class="max-w-4xl mx-auto">
+        <!-- Phase Banner -->
+        {phase && (
+          <div
+            class="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+            style={`background-color: ${phase.color}20; color: ${phase.color}`}
+          >
+            <span class="w-2 h-2 rounded-full" style={`background-color: ${phase.color}`}></span>
+            Fase: {phase.label}
+          </div>
+        )}
+
+        <!-- Title & Meta -->
+        <header class="mb-8">
+          <h1 class="text-4xl md:text-5xl font-bold text-spiral-light mb-4">
+            {entry.data.title}
+          </h1>
+          <div class="flex flex-wrap gap-4 text-gray-400 mb-4">
+            <span>🏢 {entry.data.client}</span>
+            <span>•</span>
+            <span>📊 {entry.data.industry}</span>
+            <span>•</span>
+            <span>📅 {entry.data.year}</span>
+            <span>•</span>
+            <span>🏷️ {entry.data.projectType}</span>
+          </div>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            {entry.data.description}
+          </p>
+        </header>
+
+        <!-- Results Highlight -->
+        {entry.data.results && entry.data.results.length > 0 && (
+          <section class="my-12 p-8 bg-gradient-to-br from-spiral-accent/10 to-transparent border border-spiral-accent/30 rounded-xl">
+            <h2 class="text-2xl font-bold text-spiral-light mb-6">Resultados Clave</h2>
+            <div class="grid gap-6 md:grid-cols-3">
+              {entry.data.results.map((result: any) => (
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-spiral-accent mb-2">
+                    {result.value}
+                  </div>
+                  <div class="text-lg font-semibold text-spiral-light mb-1">
+                    {result.metric}
+                  </div>
+                  <div class="text-sm text-gray-400">
+                    {result.impact}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Main Content -->
+        <div class="prose prose-invert prose-lg max-w-none prose-headings:text-spiral-light prose-p:text-gray-300 prose-a:text-spiral-accent prose-strong:text-spiral-light prose-blockquote:border-spiral-accent prose-blockquote:text-gray-300">
+          <Content />
+        </div>
+
+        <!-- Tags -->
+        {entry.data.tags && entry.data.tags.length > 0 && (
+          <div class="mt-12 pt-8 border-t border-gray-800">
+            <h3 class="text-sm font-semibold text-gray-400 mb-3">Tecnologías & Metodologías</h3>
+            <div class="flex flex-wrap gap-2">
+              {entry.data.tags.map((tag: string) => (
+                <span class="inline-flex items-center rounded-md bg-gray-800 px-3 py-1 text-sm font-medium text-gray-300 ring-1 ring-inset ring-gray-700">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Related Cases -->
+        {relatedCases.length > 0 && (
+          <section class="mt-16 pt-12 border-t border-gray-800">
+            <h2 class="text-2xl font-bold text-spiral-light mb-6">Casos Relacionados</h2>
+            <div class="grid gap-6 md:grid-cols-3">
+              {relatedCases.map((relatedCase: any) => (
+                <a
+                  href={`/cases/${relatedCase.slug}`}
+                  class="group block p-6 bg-spiral-dark/50 border border-gray-700 rounded-lg hover:border-spiral-accent/50 transition-all"
+                >
+                  <h3 class="text-lg font-semibold text-spiral-light group-hover:text-spiral-accent mb-2 transition-colors">
+                    {relatedCase.data.title}
+                  </h3>
+                  <p class="text-sm text-gray-400 mb-3 line-clamp-2">
+                    {relatedCase.data.description}
+                  </p>
+                  <div class="text-xs text-gray-500">
+                    {relatedCase.data.client} · {relatedCase.data.year}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- CTA -->
+        <div class="mt-16 text-center p-8 bg-gradient-to-r from-spiral-accent/10 to-transparent border border-spiral-accent/30 rounded-xl">
+          <h3 class="text-2xl font-bold text-spiral-light mb-4">
+            ¿Tu proyecto puede tener resultados similares?
+          </h3>
+          <p class="text-gray-400 mb-6">
+            Exploremos cómo aplicar la metodología Fibonacci a tu desafío específico.
+          </p>
+          <button
+            onclick="window.spiralModal?.show()"
+            class="px-8 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent focus:ring-offset-2 focus:ring-offset-spiral-dark"
+          >
+            Iniciar Conversación
+          </button>
+        </div>
+      </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 Workalógico. Built with Astro & the Golden Ratio.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+

@@ -1,0 +1,202 @@
+---
+interface Props {
+  visible?: boolean;
+  centerX?: number;
+  centerY?: number;
+}
+
+const { visible = false, centerX = 0, centerY = 0 } = Astro.props;
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  action: string;
+}
+
+const menuItems: MenuItem[] = [
+  { id: 'home', label: 'Reset', icon: '🏠', action: 'goHome' },
+  { id: 'cases', label: 'Cases', icon: '💼', action: 'showCases' },
+  { id: 'blog', label: 'Blog', icon: '📝', action: 'showBlog' },
+  { id: 'contact', label: 'Contact', icon: '✉️', action: 'openContact' },
+];
+---
+
+<div
+  id="radial-menu"
+  class:list={[
+    'fixed z-50 transition-all duration-300',
+    visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+  ]}
+  style={`left: ${centerX}px; top: ${centerY}px; transform: translate(-50%, -50%);`}
+  role="menu"
+  aria-label="Radial navigation menu"
+  aria-hidden={!visible}
+>
+  <!-- Center circle -->
+  <div class="relative w-32 h-32">
+    <div class="absolute inset-0 bg-spiral-accent/20 backdrop-blur-md rounded-full border-2 border-spiral-accent"></div>
+    
+    <button
+      id="menu-close"
+      class="absolute inset-0 flex items-center justify-center text-2xl text-spiral-light hover:text-spiral-accent transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent rounded-full"
+      aria-label="Close menu"
+      tabindex={visible ? 0 : -1}
+    >
+      ✕
+    </button>
+
+    <!-- Menu items positioned in circle -->
+    {menuItems.map((item, index) => {
+      const angle = (index / menuItems.length) * 2 * Math.PI - Math.PI / 2;
+      const radius = 100;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+
+      return (
+        <button
+          data-menu-action={item.action}
+          class="absolute w-16 h-16 flex flex-col items-center justify-center bg-spiral-dark/90 backdrop-blur-sm border border-gray-700 rounded-full text-spiral-light hover:bg-spiral-accent hover:border-spiral-accent hover:scale-110 transition-all focus:outline-none focus:ring-2 focus:ring-spiral-accent"
+          style={`left: 50%; top: 50%; transform: translate(calc(-50% + ${x}px), calc(-50% + ${y}px));`}
+          role="menuitem"
+          aria-label={item.label}
+          tabindex={visible ? 0 : -1}
+        >
+          <span class="text-2xl">{item.icon}</span>
+          <span class="text-xs mt-1">{item.label}</span>
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  // Menu state management
+  let isMenuVisible = false;
+  let activeIndex = 0;
+  const menuItems = document.querySelectorAll('[data-menu-action]');
+  const menu = document.getElementById('radial-menu');
+  const closeBtn = document.getElementById('menu-close');
+
+  const showMenu = (x?: number, y?: number) => {
+    if (!menu) return;
+    
+    isMenuVisible = true;
+    menu.classList.remove('opacity-0', 'scale-75', 'pointer-events-none');
+    menu.classList.add('opacity-100', 'scale-100');
+    menu.setAttribute('aria-hidden', 'false');
+
+    if (x !== undefined && y !== undefined) {
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+    }
+
+    // Focus first item
+    activeIndex = 0;
+    (menuItems[0] as HTMLElement)?.focus();
+  };
+
+  const hideMenu = () => {
+    if (!menu) return;
+    
+    isMenuVisible = false;
+    menu.classList.add('opacity-0', 'scale-75', 'pointer-events-none');
+    menu.classList.remove('opacity-100', 'scale-100');
+    menu.setAttribute('aria-hidden', 'true');
+  };
+
+  const handleMenuAction = (action) => {
+    hideMenu();
+    
+    // Handle actions
+    switch (action) {
+      case 'goHome':
+        // Reset viewport to default zoom
+        window.dispatchEvent(new CustomEvent('spiralGoHome'));
+        break;
+      case 'showCases':
+        // Navigate to case studies page
+        window.location.href = '/cases';
+        break;
+      case 'showBlog':
+        // Navigate to blog page
+        window.location.href = '/blog';
+        break;
+      case 'openContact':
+        // Show contact modal
+        const modal = window.spiralModal;
+        if (modal) {
+          modal.show();
+        }
+        break;
+    }
+    
+    // Also dispatch generic event for any other listeners
+    window.dispatchEvent(new CustomEvent('spiralMenuAction', { detail: { action } }));
+  };
+
+  // Close button
+  closeBtn?.addEventListener('click', hideMenu);
+
+  // Menu item clicks
+  menuItems.forEach((item) => {
+    item.addEventListener('click', () => {
+      const action = item.getAttribute('data-menu-action');
+      if (action) handleMenuAction(action);
+    });
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (!isMenuVisible) {
+      // Open menu with Space or M
+      if (e.key === ' ' || e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        showMenu(window.innerWidth / 2, window.innerHeight / 2);
+      }
+      return;
+    }
+
+    // Menu is visible - handle navigation
+    switch (e.key) {
+      case 'Escape':
+        e.preventDefault();
+        hideMenu();
+        break;
+
+      case 'ArrowRight':
+      case 'Tab':
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % menuItems.length;
+        (menuItems[activeIndex] as HTMLElement).focus();
+        break;
+
+      case 'ArrowLeft':
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + menuItems.length) % menuItems.length;
+        (menuItems[activeIndex] as HTMLElement).focus();
+        break;
+
+      case 'Enter':
+        e.preventDefault();
+        const activeItem = menuItems[activeIndex] as HTMLElement;
+        const action = activeItem.getAttribute('data-menu-action');
+        if (action) handleMenuAction(action);
+        break;
+    }
+  });
+
+  // Expose to global for other scripts
+  window.spiralMenu = { show: showMenu, hide: hideMenu };
+</script>
+
+<style>
+  #radial-menu button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #radial-menu button:hover {
+    transform: translate(calc(-50% + var(--x, 0)), calc(-50% + var(--y, 0))) scale(1.1);
+  }
+</style>
+

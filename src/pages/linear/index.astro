@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const sections = await getCollection('sections');
+const sortedSections = sections.sort((a, b) => (b.data.priority ?? 0) - (a.data.priority ?? 0));
+---
+
+<BaseLayout
+  title="SpiralNav UI - Linear Navigation"
+  description="Browse all sections in a traditional linear layout"
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-spiral-light mb-2">
+          SpiralNav UI
+        </h1>
+        <p class="text-gray-400">
+          Linear navigation fallback - Browse all sections
+        </p>
+        <a
+          href="/"
+          class="inline-block mt-4 px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+        >
+          ← Back to Spiral Experience
+        </a>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-8">
+      <nav aria-label="Section navigation" class="mb-8">
+        <h2 class="text-xl font-semibold text-spiral-light mb-4">Sections</h2>
+        <ul class="space-y-2">
+          {sortedSections.map((section) => (
+            <li>
+              <a
+                href={`/sections/${section.slug}`}
+                class="block px-4 py-3 bg-spiral-dark/50 border border-gray-700 rounded hover:border-spiral-accent transition-colors"
+              >
+                <h3 class="font-semibold text-spiral-light">{section.data.title}</h3>
+                <p class="text-sm text-gray-400 mt-1">{section.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Quick previews -->
+      <div class="grid gap-6 md:grid-cols-2">
+        {sortedSections.slice(0, 4).map((section) => (
+          <article class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-spiral-light mb-2">
+              {section.data.title}
+            </h3>
+            <p class="text-gray-400 mb-4">{section.data.description}</p>
+            <a
+              href={`/sections/${section.slug}`}
+              class="inline-block px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+            >
+              Read More →
+            </a>
+          </article>
+        ))}
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 SpiralNav UI. Built with Astro.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+

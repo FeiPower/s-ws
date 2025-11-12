@@ -1,0 +1,93 @@
+time="2025-11-07T11:26:14-06:00" level=warning msg="D:\\OneDrive\\LongTermMemory\\100_PROYECTOS\\130_Workalógico\\140_Fibonacci_Site\\spiral-site\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2025-11-07T11:26:14-06:00" level=warning msg="D:\\OneDrive\\LongTermMemory\\100_PROYECTOS\\130_Workalógico\\140_Fibonacci_Site\\spiral-site\\docker-compose.override.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+#1 [internal] load local bake definitions
+#1 reading from stdin 670B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.dev
+#2 transferring dockerfile: 659B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:18-alpine
+#3 DONE 0.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 517B done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 3.98kB done
+#6 DONE 0.0s
+
+#7 [2/6] RUN apk add --no-cache dumb-init git
+#7 CACHED
+
+#8 [3/6] WORKDIR /app
+#8 CACHED
+
+#9 [4/6] COPY package*.json ./
+#9 CACHED
+
+#10 [5/6] RUN npm install --ignore-scripts && npm rebuild
+#10 74.29 
+#10 74.29 added 483 packages, and audited 484 packages in 1m
+#10 74.29 
+#10 74.29 179 packages are looking for funding
+#10 74.29   run `npm fund` for details
+#10 74.32 
+#10 74.32 3 moderate severity vulnerabilities
+#10 74.32 
+#10 74.32 To address all issues (including breaking changes), run:
+#10 74.32   npm audit fix --force
+#10 74.32 
+#10 74.32 Run `npm audit` for details.
+#10 74.32 npm notice
+#10 74.32 npm notice New major version of npm available! 10.8.2 -> 11.6.2
+#10 74.32 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.2
+#10 74.32 npm notice To update run: npm install -g npm@11.6.2
+#10 74.32 npm notice
+#10 75.08 npm error code 127
+#10 75.08 npm error path /app/node_modules/rollup
+#10 75.08 npm error command failed
+#10 75.08 npm error command sh -c patch-package
+#10 75.08 npm error sh: patch-package: not found
+#10 75.08 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-11-07T17_27_29_934Z-debug-0.log
+#10 ERROR: process "/bin/sh -c npm install --ignore-scripts && npm rebuild" did not complete successfully: exit code: 127
+------
+ > [5/6] RUN npm install --ignore-scripts && npm rebuild:
+74.32 npm notice New major version of npm available! 10.8.2 -> 11.6.2
+74.32 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.2
+74.32 npm notice To update run: npm install -g npm@11.6.2
+74.32 npm notice
+75.08 npm error code 127
+75.08 npm error path /app/node_modules/rollup
+75.08 npm error command failed
+75.08 npm error command sh -c patch-package
+75.08 npm error sh: patch-package: not found
+75.08 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-11-07T17_27_29_934Z-debug-0.log
+------
+Dockerfile.dev:15
+
+--------------------
+
+  13 |     
+
+  14 |     # Install all dependencies (including dev), ignore optional scripts
+
+  15 | >>> RUN npm install --ignore-scripts && npm rebuild
+
+  16 |     
+
+  17 |     # Copy source code
+
+--------------------
+
+failed to solve: process "/bin/sh -c npm install --ignore-scripts && npm rebuild" did not complete successfully: exit code: 127
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/qhyn8nctcoei93gb54ehha1pw
+

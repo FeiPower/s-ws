@@ -1,0 +1,324 @@
+---
+import { RENDERER } from '../config/graphics';
+import { getCollection } from 'astro:content';
+import TileCard from '../components/TileCard.astro';
+import type { TileSpec } from '../utils/tiles/types';
+
+// Load sections from content collection
+const sections = await getCollection('sections');
+
+// Map sections to tile specifications
+const tiles: TileSpec[] = sections
+  .filter((s) => s.data.bbox) // Only sections with bounding boxes
+  .map((s, i) => ({
+    id: s.slug,
+    title: s.data.title,
+    route: `/sections/${s.slug}`,
+    summary: s.data.description,
+    bbox: s.data.bbox!,
+    priority: s.data.priority ?? (sections.length - i),
+  }))
+  .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+---
+
+<div id="spiral-container" class="relative w-full h-full">
+  <!-- Canvas will be mounted here -->
+  <div id="spiral-canvas" class="absolute inset-0"></div>
+
+  <!-- Tile overlays (positioned by script) -->
+  <div id="tile-container" class="absolute inset-0 pointer-events-none">
+    {tiles.map((tile) => (
+      <TileCard 
+        tile={tile} 
+        x={0} 
+        y={0} 
+        scale={0.8} 
+        focused={false} 
+        visible={false}
+      />
+    ))}
+  </div>
+
+  <!-- Instructions overlay -->
+  <div class="absolute top-4 left-4 z-20 bg-spiral-dark/80 backdrop-blur-sm rounded-lg p-4 text-sm text-gray-400 max-w-xs">
+    <h4 class="text-spiral-light font-semibold mb-2">Navigation</h4>
+    <ul class="space-y-1">
+      <li>🖱️ Scroll to zoom in/out</li>
+      <li>📱 Pinch to zoom</li>
+      <li>⌨️ +/- to zoom</li>
+      <li>⌨️ Space to open menu</li>
+    </ul>
+  </div>
+
+  <!-- Debug toggle -->
+  <button
+    id="debug-toggle"
+    class="absolute bottom-4 right-4 z-20 px-3 py-2 bg-spiral-dark/80 backdrop-blur-sm rounded text-xs text-gray-400 hover:text-spiral-light transition-colors"
+    aria-label="Toggle debug info"
+  >
+    Debug: OFF
+  </button>
+</div>
+
+<script define:vars={{ tiles, rendererMode: RENDERER }}>
+  // Dynamic imports
+  let engine;
+  let inputHandler;
+  let animationId = null;
+  let focusedTileId = null;
+
+  const PHI = 1.618;
+
+  // Calculate zoom phase based on viewport scale
+  const getZoomPhase = (scale) => {
+    const q = Math.log(scale / 25) / Math.log(PHI);
+    if (q < 0.5) return 'overview';
+    if (q < 1.5) return 'discovery';
+    if (q < 2.5) return 'strategy';
+    if (q < 3.5) return 'execution';
+    return 'scale';
+  };
+
+  // Update tile positions and visibility based on viewport
+  const updateTilePositions = async () => {
+    if (!engine) return;
+
+    const viewport = engine.getViewport();
+    const canvasContainer = document.getElementById('spiral-canvas');
+    if (!canvasContainer) return;
+
+    const width = canvasContainer.clientWidth;
+    const height = canvasContainer.clientHeight;
+
+    // Import transform utilities
+    const { toScreen } = await import('/src/utils/spiral/transforms.ts');
+
+    // Get all tile elements
+    const tileElements = document.querySelectorAll('[data-tile-id]');
+    
+    const phase = getZoomPhase(viewport.scale);
+
+    tileElements.forEach((el) => {
+      const tileId = el.getAttribute('data-tile-id');
+      const tile = tiles.find((t) => t.id === tileId);
+      if (!tile) return;
+
+      // Calculate tile center in polar coordinates
+      const r = (tile.bbox.rMin + tile.bbox.rMax) / 2;
+      const theta = (tile.bbox.tMin + tile.bbox.tMax) / 2;
+
+      // Convert to world coordinates
+      const worldX = r * Math.cos(theta);
+      const worldY = r * Math.sin(theta);
+
+      // Convert to screen coordinates
+      const screen = toScreen(worldX, worldY, width, height, viewport);
+
+      // Calculate visibility based on screen position and zoom level
+      const margin = 200;
+      const isOnScreen = 
+        screen.x >= -margin && 
+        screen.x <= width + margin &&
+        screen.y >= -margin && 
+        screen.y <= height + margin;
+
+      // Scale based on zoom level (make tiles bigger)
+      const tileScale = Math.min(1.5, 0.8 + viewport.scale / 80);
+      
+      // Opacity based on screen visibility
+      // Make tiles fully visible when on screen
+      let opacity = 0;
+      if (isOnScreen) {
+        // Distance from center for subtle fade
+        const distanceFromCenter = Math.sqrt(
+          Math.pow(screen.x - width / 2, 2) + 
+          Math.pow(screen.y - height / 2, 2)
+        );
+        const maxDistance = Math.sqrt(width * width + height * height) / 2;
+        const centerProximity = 1 - Math.min(1, distanceFromCenter / maxDistance);
+        
+        // Much more visible: minimum 0.6 opacity
+        opacity = Math.max(0.6, centerProximity * 0.4 + 0.6);
+      }
+
+      // Apply position and style
+      el.style.transform = `translate(${screen.x}px, ${screen.y}px) scale(${tileScale})`;
+      el.style.opacity = opacity.toString();
+      
+      if (isOnScreen && opacity > 0.3) {
+        el.classList.remove('pointer-events-none');
+        el.classList.add('pointer-events-auto');
+      } else {
+        el.classList.add('pointer-events-none');
+        el.classList.remove('pointer-events-auto');
+      }
+
+      // Update focused state
+      if (tileId === focusedTileId) {
+        el.classList.add('ring-2', 'ring-spiral-accent', 'shadow-lg', 'shadow-spiral-accent/50', 'scale-110');
+      } else {
+        el.classList.remove('ring-2', 'ring-spiral-accent', 'shadow-lg', 'shadow-spiral-accent/50', 'scale-110');
+      }
+    });
+  };
+
+  // Animation loop for tile positioning
+  const startTileAnimation = () => {
+    const animate = () => {
+      updateTilePositions();
+      animationId = requestAnimationFrame(animate);
+    };
+    animate();
+  };
+
+  const init = async () => {
+    const canvasContainer = document.getElementById('spiral-canvas');
+    if (!canvasContainer) return;
+
+    // Import the appropriate engine
+    let EngineClass;
+    if (rendererMode === 'webgl') {
+      const module = await import('/src/components/SpiralEngineGL.ts');
+      EngineClass = module.SpiralEngineGL;
+    } else {
+      const module = await import('/src/components/SpiralEngineCanvas.ts');
+      EngineClass = module.SpiralEngineCanvas;
+    }
+
+    // Create engine
+    engine = new EngineClass({ debug: false });
+    engine.mount(canvasContainer);
+    engine.setTiles(tiles);
+
+    // Start tile positioning animation
+    startTileAnimation();
+
+    // Setup input handler
+    const { UnifiedInputHandler } = await import('/src/utils/input/unifiedInput.ts');
+    inputHandler = new UnifiedInputHandler(canvasContainer, {
+      onWheel: (deltaY, clientX, clientY) => {
+        engine.handleWheel(deltaY, clientX, clientY);
+      },
+      onPan: (deltaX, deltaY) => {
+        engine.handlePan(deltaX, deltaY);
+      },
+      onKeyDown: (key, event) => {
+        if (key === ' ' || key === 'm' || key === 'M') {
+          event.preventDefault();
+          // Open radial menu
+          const menu = window.spiralMenu;
+          if (menu) {
+            menu.show(window.innerWidth / 2, window.innerHeight / 2);
+          }
+        } else if (key === 'Home' || key === 'h') {
+          event.preventDefault();
+          // Reset to home position
+          engine.setViewport({ scale: 25, offsetX: 0, offsetY: 0, rotation: 0 });
+          focusedTileId = null;
+        } else if (key === 'Escape') {
+          event.preventDefault();
+          // Clear focus
+          focusedTileId = null;
+        }
+      },
+    });
+
+    // Focus handling
+    engine.onFocus((tileId) => {
+      focusedTileId = tileId;
+      updateFocusOverlay(tileId);
+    });
+
+    // Tile click and keyboard handling
+    document.querySelectorAll('[data-tile-id]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const tileId = el.getAttribute('data-tile-id');
+        focusedTileId = tileId;
+        updateFocusOverlay(tileId);
+      });
+
+      // Keyboard navigation for tiles
+      el.addEventListener('keydown', (e) => {
+        const tileId = el.getAttribute('data-tile-id');
+        
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          focusedTileId = tileId;
+          updateFocusOverlay(tileId);
+          
+          // Also activate the link
+          const link = el.querySelector('a');
+          if (link) link.click();
+        }
+      });
+
+      // Focus handling
+      el.addEventListener('focus', () => {
+        const tileId = el.getAttribute('data-tile-id');
+        focusedTileId = tileId;
+        updateFocusOverlay(tileId);
+      });
+    });
+
+    // Listen for goHome event from menu
+    window.addEventListener('spiralGoHome', () => {
+      engine.setViewport({ scale: 25, offsetX: 0, offsetY: 0, rotation: 0 });
+      focusedTileId = null;
+    });
+
+    // Debug toggle
+    const debugToggle = document.getElementById('debug-toggle');
+    let debugMode = false;
+    debugToggle?.addEventListener('click', () => {
+      debugMode = !debugMode;
+      engine.config.debug = debugMode;
+      debugToggle.textContent = `Debug: ${debugMode ? 'ON' : 'OFF'}`;
+    });
+  };
+
+  // Update focus overlay position
+  const updateFocusOverlay = (tileId) => {
+    const overlay = document.getElementById('focus-overlay');
+    const ring = document.getElementById('focus-ring');
+    
+    if (!overlay || !ring) return;
+
+    if (tileId) {
+      const tileEl = document.querySelector(`[data-tile-id="${tileId}"]`);
+      if (tileEl) {
+        const rect = tileEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        ring.style.left = `${centerX}px`;
+        ring.style.top = `${centerY}px`;
+        
+        overlay.classList.remove('opacity-0');
+        overlay.classList.add('opacity-100');
+      }
+    } else {
+      overlay.classList.add('opacity-0');
+      overlay.classList.remove('opacity-100');
+    }
+  };
+
+  // Cleanup on page unload
+  const cleanup = () => {
+    if (animationId !== null) {
+      cancelAnimationFrame(animationId);
+    }
+    if (inputHandler) inputHandler.destroy();
+    if (engine) engine.unmount();
+  };
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Cleanup
+  window.addEventListener('beforeunload', cleanup);
+</script>
+

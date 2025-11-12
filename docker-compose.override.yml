@@ -1,0 +1,22 @@
+# Override file for local development
+# This file is automatically merged with docker-compose.yml
+
+version: '3.8'
+
+services:
+  spiral-dev:
+    # Additional dev-specific settings
+    stdin_open: true
+    tty: true
+    # Mount additional directories for development
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./astro.config.mjs:/app/astro.config.mjs
+      - ./tailwind.config.cjs:/app/tailwind.config.cjs
+      - ./tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    # Override environment variables from .env file
+    env_file:
+      - .env
+

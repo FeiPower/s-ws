@@ -1,0 +1,278 @@
+---
+import { FORM_ENDPOINT } from '../config/graphics';
+
+interface Props {
+  visible?: boolean;
+  type?: 'contact' | 'subscribe';
+}
+
+const { visible = false, type = 'contact' } = Astro.props;
+---
+
+<div
+  id="modal-form"
+  class:list={[
+    'fixed inset-0 z-50 flex items-center justify-center transition-all duration-300',
+    visible ? 'opacity-100' : 'opacity-0 pointer-events-none',
+  ]}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  aria-hidden={!visible}
+>
+  <!-- Backdrop -->
+  <div
+    id="modal-backdrop"
+    class="absolute inset-0 bg-spiral-dark/80 backdrop-blur-sm"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal content -->
+  <div class="relative bg-spiral-dark border border-gray-700 rounded-lg shadow-2xl max-w-md w-full mx-4 p-6">
+    <!-- Close button -->
+    <button
+      id="modal-close"
+      class="absolute top-4 right-4 text-gray-400 hover:text-spiral-light transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent rounded"
+      aria-label="Close modal"
+      tabindex={visible ? 0 : -1}
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Form -->
+    <h2 id="modal-title" class="text-2xl font-bold text-spiral-light mb-4">
+      {type === 'contact' ? 'Get in Touch' : 'Subscribe to Updates'}
+    </h2>
+
+    <form id="spiral-form" class="space-y-4" novalidate>
+      <!-- Name field -->
+      <div>
+        <label for="form-name" class="block text-sm font-medium text-gray-300 mb-1">
+          Name <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          id="form-name"
+          name="name"
+          required
+          class="w-full px-4 py-2 bg-spiral-dark border border-gray-700 rounded text-spiral-light focus:outline-none focus:ring-2 focus:ring-spiral-accent focus:border-transparent"
+          placeholder="Your name"
+          tabindex={visible ? 0 : -1}
+        />
+        <span class="error-message hidden text-red-400 text-sm mt-1"></span>
+      </div>
+
+      <!-- Email field -->
+      <div>
+        <label for="form-email" class="block text-sm font-medium text-gray-300 mb-1">
+          Email <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="email"
+          id="form-email"
+          name="email"
+          required
+          class="w-full px-4 py-2 bg-spiral-dark border border-gray-700 rounded text-spiral-light focus:outline-none focus:ring-2 focus:ring-spiral-accent focus:border-transparent"
+          placeholder="your@email.com"
+          tabindex={visible ? 0 : -1}
+        />
+        <span class="error-message hidden text-red-400 text-sm mt-1"></span>
+      </div>
+
+      {type === 'contact' && (
+        <div>
+          <label for="form-message" class="block text-sm font-medium text-gray-300 mb-1">
+            Message <span class="text-red-400">*</span>
+          </label>
+          <textarea
+            id="form-message"
+            name="message"
+            required
+            rows="4"
+            class="w-full px-4 py-2 bg-spiral-dark border border-gray-700 rounded text-spiral-light focus:outline-none focus:ring-2 focus:ring-spiral-accent focus:border-transparent resize-none"
+            placeholder="Your message..."
+            tabindex={visible ? 0 : -1}
+          ></textarea>
+          <span class="error-message hidden text-red-400 text-sm mt-1"></span>
+        </div>
+      )}
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        class="w-full px-6 py-3 bg-spiral-accent text-white rounded font-medium hover:bg-spiral-accent/80 focus:outline-none focus:ring-2 focus:ring-spiral-accent focus:ring-offset-2 focus:ring-offset-spiral-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        tabindex={visible ? 0 : -1}
+      >
+        {type === 'contact' ? 'Send Message' : 'Subscribe'}
+      </button>
+
+      <!-- Status message -->
+      <div id="form-status" class="hidden text-center text-sm"></div>
+    </form>
+  </div>
+</div>
+
+<script define:vars={{ formEndpoint: FORM_ENDPOINT }}>
+  const modal = document.getElementById('modal-form');
+  const form = document.getElementById('spiral-form') as HTMLFormElement;
+  const closeBtn = document.getElementById('modal-close');
+  const backdrop = document.getElementById('modal-backdrop');
+  const statusDiv = document.getElementById('form-status');
+
+  let isModalVisible = false;
+
+  const showModal = () => {
+    if (!modal) return;
+    
+    isModalVisible = true;
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Focus first input
+    const firstInput = form?.querySelector('input') as HTMLElement;
+    setTimeout(() => firstInput?.focus(), 100);
+  };
+
+  const hideModal = () => {
+    if (!modal) return;
+    
+    isModalVisible = false;
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.classList.remove('opacity-100');
+    modal.setAttribute('aria-hidden', 'true');
+
+    // Reset form
+    form?.reset();
+    clearErrors();
+    hideStatus();
+  };
+
+  const clearErrors = () => {
+    form?.querySelectorAll('.error-message').forEach((el) => {
+      el.classList.add('hidden');
+      el.textContent = '';
+    });
+    form?.querySelectorAll('input, textarea').forEach((el) => {
+      el.classList.remove('border-red-400');
+    });
+  };
+
+  const showError = (fieldName: string, message: string) => {
+    const field = form?.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+    const errorEl = field?.parentElement?.querySelector('.error-message');
+    
+    if (field && errorEl) {
+      field.classList.add('border-red-400');
+      errorEl.classList.remove('hidden');
+      errorEl.textContent = message;
+    }
+  };
+
+  const showStatus = (message: string, isError = false) => {
+    if (!statusDiv) return;
+    
+    statusDiv.textContent = message;
+    statusDiv.className = `text-center text-sm ${isError ? 'text-red-400' : 'text-green-400'}`;
+    statusDiv.classList.remove('hidden');
+  };
+
+  const hideStatus = () => {
+    if (!statusDiv) return;
+    statusDiv.classList.add('hidden');
+  };
+
+  const validateForm = (): boolean => {
+    clearErrors();
+    let isValid = true;
+
+    const name = (form?.querySelector('[name="name"]') as HTMLInputElement)?.value.trim();
+    const email = (form?.querySelector('[name="email"]') as HTMLInputElement)?.value.trim();
+    const message = (form?.querySelector('[name="message"]') as HTMLTextAreaElement)?.value?.trim();
+
+    if (!name) {
+      showError('name', 'Name is required');
+      isValid = false;
+    }
+
+    if (!email) {
+      showError('email', 'Email is required');
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('email', 'Please enter a valid email');
+      isValid = false;
+    }
+
+    if (message !== undefined && !message) {
+      showError('message', 'Message is required');
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    try {
+      if (!formEndpoint) {
+        throw new Error('Form endpoint not configured');
+      }
+
+      const formData = new FormData(form!);
+      const response = await fetch(formEndpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        showStatus('Thank you! Your message has been sent.');
+        setTimeout(() => hideModal(), 2000);
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      showStatus('Sorry, there was an error. Please try again.', true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  };
+
+  // Event listeners
+  closeBtn?.addEventListener('click', hideModal);
+  backdrop?.addEventListener('click', hideModal);
+  form?.addEventListener('submit', handleSubmit);
+
+  // Escape key to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isModalVisible) {
+      hideModal();
+    }
+  });
+
+  // Listen for menu actions
+  window.addEventListener('spiralMenuAction', (e) => {
+    if (e.detail && e.detail.action === 'openContact') {
+      showModal();
+    }
+  });
+
+  // Expose to global
+  window.spiralModal = { show: showModal, hide: hideModal };
+</script>
+

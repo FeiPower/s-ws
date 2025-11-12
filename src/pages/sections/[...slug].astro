@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const sections = await getCollection('sections');
+  return sections.map((section) => ({
+    params: { slug: section.slug },
+    props: { section },
+  }));
+}
+
+interface Props {
+  section: CollectionEntry<'sections'>;
+}
+
+const { section } = Astro.props;
+const { Content } = await section.render();
+---
+
+<BaseLayout
+  title={`${section.data.title} - SpiralNav UI`}
+  description={section.data.description}
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-4">
+        <nav class="flex items-center gap-4 text-sm">
+          <a
+            href="/"
+            class="text-spiral-accent hover:text-spiral-accent/80 transition-colors"
+          >
+            Spiral Experience
+          </a>
+          <span class="text-gray-600">/</span>
+          <a
+            href="/linear"
+            class="text-gray-400 hover:text-spiral-light transition-colors"
+          >
+            Linear Navigation
+          </a>
+          <span class="text-gray-600">/</span>
+          <span class="text-gray-400">{section.data.title}</span>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <article class="container mx-auto px-4 py-12 max-w-3xl">
+      <header class="mb-8">
+        <h1 class="text-4xl font-bold text-spiral-light mb-4">
+          {section.data.title}
+        </h1>
+        <p class="text-xl text-gray-400">
+          {section.data.description}
+        </p>
+        {section.data.pubDate && (
+          <time class="block mt-2 text-sm text-gray-500">
+            {section.data.pubDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        )}
+      </header>
+
+      <div class="prose prose-invert prose-lg max-w-none">
+        <Content />
+      </div>
+
+      <!-- Navigation -->
+      <nav class="mt-12 pt-8 border-t border-gray-800 flex justify-between">
+        <a
+          href="/linear"
+          class="px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+        >
+          ← All Sections
+        </a>
+        <a
+          href="/"
+          class="px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+        >
+          Spiral Experience →
+        </a>
+      </nav>
+    </article>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 SpiralNav UI. Built with Astro.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .prose h2 {
+    @apply text-2xl font-bold text-spiral-light mt-8 mb-4;
+  }
+
+  .prose h3 {
+    @apply text-xl font-semibold text-spiral-light mt-6 mb-3;
+  }
+
+  .prose p {
+    @apply text-gray-300 mb-4 leading-relaxed;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply text-gray-300 mb-4 space-y-2;
+  }
+
+  .prose li {
+    @apply ml-6;
+  }
+
+  .prose code {
+    @apply bg-gray-800 px-2 py-1 rounded text-spiral-accent text-sm;
+  }
+
+  .prose pre {
+    @apply bg-gray-900 p-4 rounded overflow-x-auto mb-4;
+  }
+
+  .prose a {
+    @apply text-spiral-accent hover:underline;
+  }
+</style>
+

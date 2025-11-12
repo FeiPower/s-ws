@@ -1,0 +1,28 @@
+# Development Dockerfile with hot reload
+
+FROM node:18-alpine
+
+# Install dumb-init and git for proper signal handling and npm dependencies
+RUN apk add --no-cache dumb-init git
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev), ignore optional scripts
+RUN npm install --ignore-scripts
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 4321
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+

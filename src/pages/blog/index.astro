@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const featuredPosts = sortedPosts.filter(p => p.data.featured);
+
+const formatDate = (date: Date) => new Date(date).toLocaleDateString('es-ES', { 
+  year: 'numeric', 
+  month: 'long', 
+  day: 'numeric' 
+});
+---
+
+<BaseLayout
+  title="Blog - Fibonacci Growth Insights"
+  description="Thoughts on growth, AI, multi-agent systems, and the mathematics of scaling"
+>
+  <div class="min-h-screen bg-spiral-dark">
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-spiral-dark/95 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-spiral-light mb-2">
+          Blog
+        </h1>
+        <p class="text-gray-400">
+          Growth, IA, sistemas multi-agente y la matemática del escalamiento
+        </p>
+        <div class="flex gap-4 mt-4">
+          <a
+            href="/"
+            class="inline-block px-4 py-2 bg-spiral-accent text-white rounded hover:bg-spiral-accent/80 transition-colors"
+          >
+            ← Spiral Experience
+          </a>
+          <a
+            href="/linear"
+            class="inline-block px-4 py-2 bg-spiral-dark border border-gray-700 text-spiral-light rounded hover:border-spiral-accent transition-colors"
+          >
+            Linear Navigation
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-12">
+      <div class="max-w-4xl mx-auto">
+        <!-- Intro -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold text-spiral-light mb-4">
+            Pensamientos sobre Crecimiento Exponencial
+          </h2>
+          <p class="text-gray-400 leading-relaxed">
+            Exploramos la intersección de matemática, tecnología y estrategia de negocio. 
+            Cada artículo destila años de experiencia en transformación digital y crecimiento escalable.
+          </p>
+        </div>
+
+        <!-- Featured Posts -->
+        {featuredPosts.length > 0 && (
+          <section class="mb-12">
+            <h3 class="text-xl font-bold text-spiral-light mb-6">Destacados</h3>
+            <div class="grid gap-6 md:grid-cols-2">
+              {featuredPosts.map((post) => (
+                <ContentCard
+                  title={post.data.title}
+                  description={post.data.description}
+                  href={`/blog/${post.slug}`}
+                  tags={post.data.tags}
+                  phaseId={post.data.phaseId}
+                  meta={`${post.data.author} · ${formatDate(post.data.pubDate)} · ${post.data.readTime} min`}
+                  featured={true}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- All Posts Grid -->
+        <div class="mb-12">
+          <h3 class="text-xl font-bold text-spiral-light mb-6">Todos los Artículos</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedPosts.map((post) => (
+              <ContentCard
+                title={post.data.title}
+                description={post.data.description}
+                href={`/blog/${post.slug}`}
+                tags={post.data.tags}
+                phaseId={post.data.phaseId}
+                meta={`${formatDate(post.data.pubDate)} · ${post.data.readTime || 5} min`}
+                featured={false}
+              />
+            ))}
+          </div>
+        </div>
+
+        <!-- Newsletter CTA -->
+        <div class="bg-spiral-dark/50 border border-gray-700 rounded-lg p-8 text-center">
+          <div class="max-w-2xl mx-auto">
+            <h3 class="text-2xl font-bold text-spiral-light mb-3">
+              📬 Suscríbete a nuestra Newsletter
+            </h3>
+            <p class="text-gray-400 mb-6">
+              Recibe insights sobre crecimiento exponencial, IA y arquitectura de sistemas directamente en tu inbox. 
+              Un artículo por semana, sin spam.
+            </p>
+            <button
+              onclick="window.spiralModal?.show()"
+              class="px-8 py-3 bg-spiral-accent text-white rounded-lg font-medium hover:bg-spiral-accent/80 transition-colors focus:outline-none focus:ring-2 focus:ring-spiral-accent"
+            >
+              Suscribirme
+            </button>
+          </div>
+        </div>
+
+        <!-- Topics -->
+        <div class="mt-12">
+          <h3 class="text-xl font-bold text-spiral-light mb-6">Temas</h3>
+          <div class="flex flex-wrap gap-3">
+            {['Growth Strategy', 'AI & Automation', 'Multi-Agent Systems', 'Design Systems', 'Performance', 'ROI Analysis', 'Case Studies', 'Methodology'].map((topic) => (
+              <button class="px-4 py-2 bg-spiral-dark/50 border border-gray-700 text-gray-400 rounded-full text-sm hover:border-spiral-accent hover:text-spiral-light transition-colors">
+                {topic}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-16 py-8">
+      <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>© 2024 Workalógico. Built with Astro & the Golden Ratio.</p>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+

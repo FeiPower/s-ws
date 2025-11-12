@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SpiralEngineIsland from '../islands/SpiralEngineIsland.astro';
+import FocusOverlay from '../components/FocusOverlay.astro';
+import MenuRadial from '../components/MenuRadial.astro';
+import ModalForm from '../components/ModalForm.astro';
+---
+
+<BaseLayout 
+  title="Workalógico - Fibonacci Growth Experience"
+  description="Navigate through infinite exponential growth. We develop everything: software, branding, consulting, startups. Experience the spiral methodology."
+>
+  <div class="w-full h-full relative">
+    <!-- Spiral Engine Island -->
+    <SpiralEngineIsland />
+    
+    <!-- Focus Overlay -->
+    <FocusOverlay visible={false} />
+    
+    <!-- Radial Menu -->
+    <MenuRadial visible={false} />
+    
+    <!-- Modal Form -->
+    <ModalForm visible={false} type="contact" />
+    
+    <!-- Loading state -->
+    <div id="loading" class="absolute inset-0 flex items-center justify-center bg-spiral-dark z-50">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-spiral-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-spiral-light/70">Initializing spiral...</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Hide loading screen once page is interactive
+  window.addEventListener('load', () => {
+    const loading = document.getElementById('loading');
+    if (loading) {
+      loading.style.opacity = '0';
+      loading.style.transition = 'opacity 0.5s ease-out';
+      setTimeout(() => loading.remove(), 500);
+    }
+  });
+</script>
+

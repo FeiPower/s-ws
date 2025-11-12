@@ -78,7 +78,7 @@ const menuItems: MenuItem[] = [
   const menu = document.getElementById('radial-menu');
   const closeBtn = document.getElementById('menu-close');
 
-  const showMenu = (x?: number, y?: number) => {
+  const showMenu = (x, y) => {
     if (!menu) return;
     
     isMenuVisible = true;
@@ -93,7 +93,8 @@ const menuItems: MenuItem[] = [
 
     // Focus first item
     activeIndex = 0;
-    (menuItems[0] as HTMLElement)?.focus();
+    const first = menuItems[0];
+    first && typeof first.focus === 'function' && first.focus();
   };
 
   const hideMenu = () => {
@@ -124,7 +125,7 @@ const menuItems: MenuItem[] = [
         break;
       case 'openContact':
         // Show contact modal
-        const modal = window.spiralModal;
+        const modal = window['spiralModal'];
         if (modal) {
           modal.show();
         }
@@ -168,18 +169,20 @@ const menuItems: MenuItem[] = [
       case 'Tab':
         e.preventDefault();
         activeIndex = (activeIndex + 1) % menuItems.length;
-        (menuItems[activeIndex] as HTMLElement).focus();
+        const next = menuItems[activeIndex];
+        next && typeof next.focus === 'function' && next.focus();
         break;
 
       case 'ArrowLeft':
         e.preventDefault();
         activeIndex = (activeIndex - 1 + menuItems.length) % menuItems.length;
-        (menuItems[activeIndex] as HTMLElement).focus();
+        const prev = menuItems[activeIndex];
+        prev && typeof prev.focus === 'function' && prev.focus();
         break;
 
       case 'Enter':
         e.preventDefault();
-        const activeItem = menuItems[activeIndex] as HTMLElement;
+        const activeItem = menuItems[activeIndex];
         const action = activeItem.getAttribute('data-menu-action');
         if (action) handleMenuAction(action);
         break;
@@ -187,7 +190,7 @@ const menuItems: MenuItem[] = [
   });
 
   // Expose to global for other scripts
-  window.spiralMenu = { show: showMenu, hide: hideMenu };
+  window['spiralMenu'] = { show: showMenu, hide: hideMenu };
 </script>
 
 <style>

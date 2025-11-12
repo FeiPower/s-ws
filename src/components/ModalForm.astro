@@ -116,7 +116,7 @@ const { visible = false, type = 'contact' } = Astro.props;
 
 <script define:vars={{ formEndpoint: FORM_ENDPOINT }}>
   const modal = document.getElementById('modal-form');
-  const form = document.getElementById('spiral-form') as HTMLFormElement;
+  const form = document.getElementById('spiral-form');
   const closeBtn = document.getElementById('modal-close');
   const backdrop = document.getElementById('modal-backdrop');
   const statusDiv = document.getElementById('form-status');
@@ -132,8 +132,8 @@ const { visible = false, type = 'contact' } = Astro.props;
     modal.setAttribute('aria-hidden', 'false');
 
     // Focus first input
-    const firstInput = form?.querySelector('input') as HTMLElement;
-    setTimeout(() => firstInput?.focus(), 100);
+    const firstInput = form?.querySelector('input');
+    setTimeout(() => firstInput && typeof firstInput.focus === 'function' && firstInput.focus(), 100);
   };
 
   const hideModal = () => {
@@ -145,7 +145,9 @@ const { visible = false, type = 'contact' } = Astro.props;
     modal.setAttribute('aria-hidden', 'true');
 
     // Reset form
-    form?.reset();
+    if (form && typeof form.reset === 'function') {
+      form.reset();
+    }
     clearErrors();
     hideStatus();
   };
@@ -160,8 +162,8 @@ const { visible = false, type = 'contact' } = Astro.props;
     });
   };
 
-  const showError = (fieldName: string, message: string) => {
-    const field = form?.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+  const showError = (fieldName, message) => {
+    const field = form?.querySelector(`[name="${fieldName}"]`);
     const errorEl = field?.parentElement?.querySelector('.error-message');
     
     if (field && errorEl) {
@@ -171,7 +173,7 @@ const { visible = false, type = 'contact' } = Astro.props;
     }
   };
 
-  const showStatus = (message: string, isError = false) => {
+  const showStatus = (message, isError = false) => {
     if (!statusDiv) return;
     
     statusDiv.textContent = message;
@@ -184,13 +186,16 @@ const { visible = false, type = 'contact' } = Astro.props;
     statusDiv.classList.add('hidden');
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     clearErrors();
     let isValid = true;
 
-    const name = (form?.querySelector('[name="name"]') as HTMLInputElement)?.value.trim();
-    const email = (form?.querySelector('[name="email"]') as HTMLInputElement)?.value.trim();
-    const message = (form?.querySelector('[name="message"]') as HTMLTextAreaElement)?.value?.trim();
+    const nameEl = form?.querySelector('[name="name"]');
+    const emailEl = form?.querySelector('[name="email"]');
+    const messageEl = form?.querySelector('[name="message"]');
+    const name = nameEl && 'value' in nameEl ? (nameEl.value || '').trim() : '';
+    const email = emailEl && 'value' in emailEl ? (emailEl.value || '').trim() : '';
+    const message = messageEl && 'value' in messageEl ? (messageEl.value || '').trim() : undefined;
 
     if (!name) {
       showError('name', 'Name is required');
@@ -213,23 +218,28 @@ const { visible = false, type = 'contact' } = Astro.props;
     return isValid;
   };
 
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-    const originalText = submitBtn.textContent;
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.textContent : '';
     
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+    }
 
     try {
       if (!formEndpoint) {
         throw new Error('Form endpoint not configured');
       }
 
-      const formData = new FormData(form!);
+      if (!form) {
+        throw new Error('Form not found');
+      }
+      const formData = new FormData(form);
       const response = await fetch(formEndpoint, {
         method: 'POST',
         body: formData,
@@ -248,8 +258,10 @@ const { visible = false, type = 'contact' } = Astro.props;
       console.error('Form submission error:', error);
       showStatus('Sorry, there was an error. Please try again.', true);
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
     }
   };
 
@@ -273,6 +285,6 @@ const { visible = false, type = 'contact' } = Astro.props;
   });
 
   // Expose to global
-  window.spiralModal = { show: showModal, hide: hideModal };
+  window['spiralModal'] = { show: showModal, hide: hideModal };
 </script>
 

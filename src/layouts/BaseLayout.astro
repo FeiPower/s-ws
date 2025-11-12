@@ -11,10 +11,8 @@ const {
   ogImage = 'og-default.jpg',
 } = Astro.props;
 
-const siteWithBase = new URL(Astro.base, Astro.site);
-const canonicalURL = new URL(Astro.url.pathname.replace(/^\//, ''), siteWithBase);
-const toBaseHref = (path: string) => `${Astro.base}${path.replace(/^\//, '')}`;
-const ogImageURL = new URL(toBaseHref(ogImage), Astro.site);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(Astro.resolve(`/${ogImage}`), Astro.site);
 import '../styles/global.css';
 ---
 
@@ -23,7 +21,7 @@ import '../styles/global.css';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={toBaseHref('favicon.svg')} />
+    <link rel="icon" type="image/svg+xml" href={Astro.resolve('/favicon.svg')} />
     <meta name="generator" content={Astro.generator} />
     
     <!-- Primary Meta Tags -->

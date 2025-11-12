@@ -91,7 +91,7 @@ const tiles: TileSpec[] = sections
     const height = canvasContainer.clientHeight;
 
     // Import transform utilities
-    const { toScreen } = await import('/src/utils/spiral/transforms.ts');
+    const { toScreen } = await import('../utils/spiral/transforms.ts');
 
     // Get all tile elements
     const tileElements = document.querySelectorAll('[data-tile-id]');
@@ -178,10 +178,10 @@ const tiles: TileSpec[] = sections
     // Import the appropriate engine
     let EngineClass;
     if (rendererMode === 'webgl') {
-      const module = await import('/src/components/SpiralEngineGL.ts');
+      const module = await import('../components/SpiralEngineGL.ts');
       EngineClass = module.SpiralEngineGL;
     } else {
-      const module = await import('/src/components/SpiralEngineCanvas.ts');
+      const module = await import('../components/SpiralEngineCanvas.ts');
       EngineClass = module.SpiralEngineCanvas;
     }
 
@@ -194,7 +194,7 @@ const tiles: TileSpec[] = sections
     startTileAnimation();
 
     // Setup input handler
-    const { UnifiedInputHandler } = await import('/src/utils/input/unifiedInput.ts');
+    const { UnifiedInputHandler } = await import('../utils/input/unifiedInput.ts');
     inputHandler = new UnifiedInputHandler(canvasContainer, {
       onWheel: (deltaY, clientX, clientY) => {
         engine.handleWheel(deltaY, clientX, clientY);
@@ -206,7 +206,7 @@ const tiles: TileSpec[] = sections
         if (key === ' ' || key === 'm' || key === 'M') {
           event.preventDefault();
           // Open radial menu
-          const menu = window.spiralMenu;
+          const menu = window['spiralMenu'];
           if (menu) {
             menu.show(window.innerWidth / 2, window.innerHeight / 2);
           }
